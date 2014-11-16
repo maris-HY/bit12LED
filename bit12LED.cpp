@@ -15,9 +15,11 @@ byte LED_value[12];
 byte LED_pin[4];
 
 #if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny10__)
-ISR(TIM0_OVF_vect)
+ISR(TIM0_COMPA_vect)
+//ISR(TIM0_OVF_vect)
 #elif defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) 
-ISR(TIMER1_OVF_vect)
+ISR(TIMER1_COMPA_vect)
+//ISR(TIMER1_OVF_vect)
 #endif
 {
   byte i;
@@ -84,7 +86,8 @@ void start12LED(){
     LED_value[i] = 0;
   }
 #if defined(__AVR_ATtiny10__)
-  TCCR0A = (1 << WGM00);
+//  TCCR0A = (1 << WGM00);
+  TCCR0A = (1 << WGM01); 
   TCCR0B = ((1 << WGM02) | (1 << CS00));
   
   // enable timer 0 overflow interrupt
@@ -92,10 +95,21 @@ void start12LED(){
 
 #elif defined(__AVR_ATtiny13__)
   // set timer 0 prescale factor to None
-  TCCR0B = 0;
-  sbi(TCCR0B, CS00);
+//  TCCR0A = 0;
+  TCCR0A = (1 << WGM01);   // CTC mode
+
+//  TCCR0B = 0;
+//  sbi(TCCR0B, CS00);
   // enable timer 0 overflow interrupt
-  sbi(TIMSK0, TOIE0);
+//  TCCR0B = (1<<WGM02) | (1<<CS00); // CTC mode , prescalar x1;
+  TCCR0B = (1<<CS00); // prescalar x1;
+
+  OCR0A = 254; 
+
+//  sbi(TIMSK0, TOIE0);
+  sbi(TIMSK0, OCIE0A);
+
+
 #elif defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) 
   // set timer 1 prescale factor to None
   TCCR1 = 0;
