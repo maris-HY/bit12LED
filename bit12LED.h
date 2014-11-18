@@ -12,6 +12,7 @@
 #include <arduino.h>
 
 void setLEDValue(byte led,byte value);
+byte getLEDValue(byte led);
 void TurnOn1LED(byte led);
 void TurnOffAllLEDs();
 void init12LED(byte pin0,byte pin1,byte pin2,byte pin3);

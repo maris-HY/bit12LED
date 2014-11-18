@@ -11,6 +11,7 @@
 volatile byte pwmCount = 0;
 volatile byte pwmLowPin = 0;
 volatile byte pwmHighPin = 0;
+volatile byte pinHIGH[3];
 byte LED_value[12];
 byte LED_pin[4];
 
@@ -24,9 +25,15 @@ ISR(TIMER1_COMPA_vect)
 {
   byte i;
   byte led;
-  byte pinHIGH;
+//  byte pinHIGH;
   if (pwmCount == 0){
-    TurnOffAllLEDs();
+//    TurnOffAllLEDs();
+//    pinMode(LED_pin[0],INPUT);
+//    pinMode(LED_pin[1],INPUT);
+//    pinMode(LED_pin[2],INPUT);
+//    pinMode(LED_pin[3],INPUT);
+    pinMode(LED_pin[pwmLowPin],INPUT);
+
     pwmLowPin++;
     pwmHighPin += 3;
     if(pwmLowPin>3){
@@ -35,16 +42,18 @@ ISR(TIMER1_COMPA_vect)
     }
     pinMode(LED_pin[pwmLowPin],OUTPUT);
     digitalWrite(LED_pin[pwmLowPin],LOW);
+    for(i=0;i<3;i++){
+      pinHIGH[i] = LED_pin[i+((i<pwmLowPin)?0:1)];
+    } 
   }
 
   for(i=0;i<3;i++){
     led = pwmHighPin+i;
-    pinHIGH = LED_pin[i+((i<pwmLowPin)?0:1)];
     if((pwmCount == 0) && (LED_value[led] > 0)){
-      pinMode(pinHIGH,OUTPUT);
-      digitalWrite(pinHIGH,HIGH);
+      pinMode(pinHIGH[i],OUTPUT);
+      digitalWrite(pinHIGH[i],HIGH);
     } else if(LED_value[led] == pwmCount){
-      pinMode(pinHIGH,INPUT);
+      pinMode(pinHIGH[i],INPUT);
     }
   } 
   pwmCount++;
@@ -52,6 +61,10 @@ ISR(TIMER1_COMPA_vect)
 
 void setLEDValue(byte led,byte value){
   LED_value[led] = value;
+}
+
+byte getLEDValue(byte led){
+  return LED_value[led];
 }
 
 void TurnOn1LED(byte led){
@@ -104,7 +117,7 @@ void start12LED(){
 //  TCCR0B = (1<<WGM02) | (1<<CS00); // CTC mode , prescalar x1;
   TCCR0B = (1<<CS00); // prescalar x1;
 
-  OCR0A = 254; 
+  OCR0A = 100; 
 
 //  sbi(TIMSK0, TOIE0);
   sbi(TIMSK0, OCIE0A);
